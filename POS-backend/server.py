@@ -57,3 +57,23 @@ def get_active_orders():
 def complete_order(order_id:int):
     response=supabase.table("orders").update({"status":1}).eq("id",order_id).execute()
     return {"message":f"注文 {order_id} の提供が完了しました"}
+@app.get("/sales")
+def get_sales():
+    items_data=supabase.table("items").select("*").execute().data
+    order_items_data=supabase.table("order_items").select("*").execute().data
+    summary={}
+    for item  in items_data:
+        summary[item["id"]]={
+            "name":item["name"],
+            "price":item["price"],
+            "count":0,
+            "sales":0
+        }
+    total_sales=0
+    for order in order_items_data:
+        item_id=order["item_id"]
+        quantity=order["quantity"]
+        summary[item_id]["count"]+=quantity
+        summary[item_id]["sales"]+=quantity*summary[item_id]["price"]
+        total_sales+=quantity*summary[item_id]["price"]
+    return{"total_sales":total_sales,"summary":summary}
