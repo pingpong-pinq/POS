@@ -17,6 +17,20 @@ type CartItem={
     {id:3, name:"NOPE",price:400}
   ];
 export default function App(){
+    const [cart,setCart]=useState<CartItem[]>([]);
+  const addToCart =(selectedItem:MenuItem)=>{
+    const existingItem=cart.find((cartItem)=>cartItem.item.id===selectedItem.id);
+    if (existingItem){
+      setCart(
+        cart.map((cartItem)=>cartItem.item.id===selectedItem.id
+      ?{...cartItem,quantity:cartItem.quantity+1}
+      :cartItem)
+      );
+      
+    }
+    else{
+      setCart([...cart,{item:selectedItem,quantity:1}])
+  }
   return (
     <View style={styles.container}>
       <View style={styles.menuSection}>
@@ -31,6 +45,8 @@ export default function App(){
       </View>
     </View>
   );
+
+  }
 }
 const styles = StyleSheet.create({
   container: { flex: 1, flexDirection: 'row', backgroundColor: '#f5f5f5', paddingTop: 50 },
