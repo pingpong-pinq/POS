@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {StyleSheet, Text, View, TouchableOpacity} from "react-native";
+import {StyleSheet, Text, View, TouchableOpacity,Alert} from "react-native";
 
 type MenuItem={
   id:number;
@@ -29,25 +29,41 @@ export default function App(){
       
     }
     else{
-      setCart([...cart,{item:selectedItem,quantity:1}])
+      setCart([...cart,{item:selectedItem,quantity:1
+
+      }])
+  }}
+  const checkout=()=>{
+  if (cart.length===0){
+  Alert.alert("エラー","商品が選択されていません");
+  return;
   }
+  Alert.alert("注文完了","注文を確定しました",[
+    {
+      text:"OK",
+      onPress:()=>setCart([])
+    }
+  ]);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.menuSection}>
         <Text style={styles.headerTitle}>商品メニュー</Text>
         {MENU_DATA.map((item)=>(
-          <TouchableOpacity key={item.id} style={styles.itemButton}>
+          <TouchableOpacity key={item.id} style={styles.itemButton} onPress={()=>addToCart(item)}>
             <Text style={styles.itemText}>{item.name}</Text>
             <Text style={styles.priceText}>{item.price}</Text>
           </TouchableOpacity>
         )
         )}
       </View>
+      
     </View>
   );
 
   }
-}
+
 const styles = StyleSheet.create({
   container: { flex: 1, flexDirection: 'row', backgroundColor: '#f5f5f5', paddingTop: 50 },
   menuSection: { flex: 2, padding: 20 },
