@@ -58,7 +58,30 @@ export default function App(){
         )
         )}
       </View>
-      
+      <View style={styles.cartSection}>
+        <Text style={styles.headerTitle}>現在の注文</Text>
+        <View style={styles.cartList}>
+          {cart.length===0?(
+            <Text style={styles.emptyText}>まだ注文はありません</Text>
+          ):(
+            cart.map((cartItem)=>(
+              <View key={cartItem.item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                <Text style={{fontSize :18}}>{cartItem.item.id}×{cartItem.quantity}</Text>
+                <Text style={{fontSize:18}}>￥{cartItem.item.price*cartItem.quantity}</Text>
+                </View>
+            ))
+          )}
+        </View>
+      <View style={styles.checkoutBox}>
+        <Text style={styles.totalText}>
+          合計:￥{cart.reduce((sum,cartItem)=>sum+(cartItem.item.price*cartItem.quantity),0)}
+        </Text>
+        <TouchableOpacity style={styles.orderButton} onPress={checkout}>
+          <Text style={styles.orderButtonText}>注文を確定する</Text>
+        </TouchableOpacity>
+      </View>
+      </View>
+    
     </View>
   );
 
@@ -71,4 +94,42 @@ const styles = StyleSheet.create({
   itemButton: { backgroundColor: '#fff', padding: 20, marginBottom: 15, borderRadius: 10, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
   itemText: { fontSize: 20, fontWeight: 'bold' },
   priceText: { fontSize: 16, color: '#666', marginTop: 5 },
+  // --- ここからカート用のスタイルを追加 ---
+  cartSection: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 1,
+    borderColor: '#ddd',
+    padding: 20,
+  },
+  cartList: {
+    flex: 1,
+  },
+  emptyText: {
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 50,
+  },
+  checkoutBox: {
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+    paddingTop: 20,
+  },
+  totalText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'right',
+  },
+  orderButton: {
+    backgroundColor: '#ff6b6b',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  orderButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
