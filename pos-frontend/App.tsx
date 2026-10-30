@@ -33,17 +33,49 @@ export default function App(){
 
       }])
   }}
-  const checkout=()=>{
+  const checkout=async ()=>{
   if (cart.length===0){
   Alert.alert("エラー","商品が選択されていません");
   return;
   }
-  Alert.alert("注文完了","注文を確定しました",[
+  try{
+    const now = new Date();
+      // "14:30:05" のような文字列を作成
+    const timeString = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    const orderData={
+      pickup_time: timeString,
+      items:cart.map((cartItem)=>({
+        item_id:cartItem.item.id,
+        quantity:cartItem.quantity
+      }))
+    }
+    const response=await fetch("http://172.20.10.4:8000/order",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+    if (response.ok){
+        Alert.alert("注文完了","注文を確定しました",[
     {
       text:"OK",
       onPress:()=>setCart([])
     }
   ]);
+    }
+    else{
+      const errorDetail = await response.text();
+        console.error("【Pythonからのエラー詳細】:", errorDetail);
+      Alert.alert("エラー","サーバー側で処理に失敗しました");
+
+    }
+  }
+  catch (error){
+    console.error(error);
+    Alert.alert("通信エラー","サーバーに接続できませんでした")
+  }
+
   }
 
   return (
@@ -66,7 +98,7 @@ export default function App(){
           ):(
             cart.map((cartItem)=>(
               <View key={cartItem.item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-                <Text style={{fontSize :18}}>{cartItem.item.id}×{cartItem.quantity}</Text>
+                <Text style={{fontSize :18}}>{cartItem.item.name}×{cartItem.quantity}</Text>
                 <Text style={{fontSize:18}}>￥{cartItem.item.price*cartItem.quantity}</Text>
                 </View>
             ))
