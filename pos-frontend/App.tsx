@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {StyleSheet, Text, View, TouchableOpacity,Alert} from "react-native";
+import {StyleSheet, Text, View, TouchableOpacity,Alert,TextInput} from "react-native";
 
 type MenuItem={
   id:number;
@@ -18,6 +18,8 @@ type CartItem={
   ];
 export default function App(){
     const [cart,setCart]=useState<CartItem[]>([]);
+    const [isPreOrder,setIsPreOrder]=useState<boolean>(false);
+    const [pickupTime,setPickupTime]=useState<string>("");
   const addToCart =(selectedItem:MenuItem)=>{
     const existingItem=cart.find((cartItem)=>cartItem.item.id===selectedItem.id);
     if (existingItem){
@@ -36,14 +38,23 @@ export default function App(){
   const checkout=async ()=>{
   if (cart.length===0){
   Alert.alert("エラー","商品が選択されていません");
+  
   return;
+  }
+  if (isPreOrder && pickupTime===""){
+    Alert.alert("エラー","予約時間を入力してください")
+    return;
+  }
+  let finalPickupTime=null;
+  if (isPreOrder){
+    finalPickupTime=pickupTime.length===5?pickupTime+":00":pickupTime;
   }
   try{
     const now = new Date();
       // "14:30:05" のような文字列を作成
     const timeString = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
     const orderData={
-      pickup_time: timeString,
+      pickup_time: finalPickupTime,
       items:cart.map((cartItem)=>({
         item_id:cartItem.item.id,
         quantity:cartItem.quantity
@@ -60,7 +71,11 @@ export default function App(){
         Alert.alert("注文完了","注文を確定しました",[
     {
       text:"OK",
-      onPress:()=>setCart([])
+      onPress:()=>{
+        setCart([]);
+        setIsPreOrder(false);
+        setPickupTime("");
+      }
     }
   ]);
     }
@@ -108,6 +123,17 @@ export default function App(){
         <Text style={styles.totalText}>
           合計:￥{cart.reduce((sum,cartItem)=>sum+(cartItem.item.price*cartItem.quantity),0)}
         </Text>
+        <View style={styles.orderTypeContainer}>
+          <TouchableOpacity style={[styles.typeButton,!isPreOrder && styles.activeTypeButton]} onPress={()=>{setIsPreOrder(false);setPickupTime("")}}>
+          <Text style={[styles.typeText,!isPreOrder &&styles.activeTypeText]}>すぐ提供</Text></TouchableOpacity>
+          <TouchableOpacity style={[styles.typeButton,isPreOrder && styles.activeTypeButton]}
+          onPress={()=>setIsPreOrder(true)}>
+            <Text style={[styles.typeText,isPreOrder&&styles.activeTypeText]}>予約注文</Text>
+          </TouchableOpacity>
+        </View>
+        {isPreOrder &&(
+          <TextInput style={styles.timeInput} placeholder="受け取り時間(例:14:30(半角))" value={pickupTime} onChangeText={setPickupTime} keyboardType={"numbers-and-punctuation"}/>
+        )}
         <TouchableOpacity style={styles.orderButton} onPress={checkout}>
           <Text style={styles.orderButtonText}>注文を確定する</Text>
         </TouchableOpacity>
@@ -163,5 +189,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+    orderTypeContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ddd'
+  },
+  typeButton: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa'
+  },
+  activeTypeButton: {
+    backgroundColor: '#4a90e2' // 選択時の色（青）
+  },
+  typeText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666'
+  },
+  activeTypeText: {
+    color: '#fff' // 選択時の文字色（白）
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 18,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+    textAlign: 'center'
   },
 });
